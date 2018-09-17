@@ -3,8 +3,8 @@
         "app_function": "sso.app", 
         "aws_region": "us-east-1", 
         "profile_name": "default", 
-        "project_name": "discourse-sso-g", 
+        "project_name": "discourse-sso",
         "runtime": "python2.7", 
-        "s3_bucket": "scrapinghub-app-singlesignon"
+        "s3_bucket": "my-discoursesso-app"
     }
 }
