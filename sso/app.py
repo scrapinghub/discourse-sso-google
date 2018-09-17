@@ -38,7 +38,7 @@ def sso_login():
         'state': state,
     })
     url = '{}?{}'.format(settings.GOOGLE_AUTH_URL, query)
-    return url + "\n"
+    return redirect(url)
 
 
 @app.route('/discourse/sso/google-oauth2/callback')
