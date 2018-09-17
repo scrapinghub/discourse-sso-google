@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <body>
+<script>
+
+function parseFragment(fragmentString) {
+  var params = {};
+  var regex = /([^&=]+)=([^&]*)/g;
+  var m;
+  while (m = regex.exec(fragmentString)) {
+    params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+  }
+  return params;
+}
+
+var params = parseFragment(location.hash.substring(1));
+console.log(params);
+
+/* Get user info from openIdConnect API */
+function queryOpenId(access_token, onsuccess, onfailure) {
+  const url = 'https://www.googleapis.com/plus/v1/people/me/openIdConnect';
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function(e) {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        onsuccess(xhr);
+      } else {
+        onfailure(xhr);
+      };
+    };
+  };
+  xhr.onerror = function() { console.error(xhr); };
+  xhr.open('GET', url);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+  xhr.send(null);
+}
+
+function verifyUser(body, state, onsuccess, onfailure) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function(e) {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        onsuccess(xhr);
+      } else {
+        onfailure(xhr);
+      };
+    };
+  };
+  xhr.onerror = function() { console.error(xhr); };
+  xhr.open('POST', '/discourse/sso/google-oauth2/verify?state=' + state);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(body);
+}
+
+queryOpenId(params['access_token'],
+  function(xhr) {
+    console.log(xhr.response);
+    var form = document.createElement('form');
+    form.setAttribute('method', 'POST');
+    form.setAttribute('action', '/discourse/sso/google-oauth2/next');
+    var formParams = {
+      'state': params['state'],
+      'userInfo': xhr.response
+    };
+    for (var p in formParams) {
+      var input = document.createElement('input');
+      input.setAttribute('type', 'hidden');
+      input.setAttribute('name', p);
+      input.setAttribute('value', formParams[p]);
+      form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+  },
+  function(xhr) {
+    console.log(xhr.statusText);
+  }
+);
+
+</script>
+  </body>
+</html>

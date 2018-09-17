@@ -5,8 +5,11 @@ name = "pypi"
 
 [packages]
 flask = "*"
+pyjwt = "*"
+six = "*"
 
 [dev-packages]
+ipython = "*"
 
 [requires]
 python_version = "2.7"
