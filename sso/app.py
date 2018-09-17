@@ -62,7 +62,9 @@ def google_oauth2_next():
     payload['username'] = userinfo['email'].partition('@')[0]
     payload['avatar_url'] = userinfo['picture']
 
-    encoded_payload = base64.urlsafe_b64encode(urllib.parse.urlencode(payload))
+    encoded_payload = base64.urlsafe_b64encode(
+        urllib.parse.urlencode(payload, doseq=1)
+    )
     signature = _sign_payload(encoded_payload)
     qs = urllib.parse.urlencode({'sso': encoded_payload, 'sig': signature})
     return redirect(settings.DISCOURSE_SSO_LOGIN + "?" + qs)
