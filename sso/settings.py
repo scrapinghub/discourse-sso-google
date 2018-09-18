@@ -18,6 +18,7 @@ GOOGLE_REDIRECT_URI = os.getenv(
     'GOOGLE_REDIRECT_URI',
     'http://localhost:5000/discourse/sso/google-oauth2/callback'
 )
+GOOGLE_DOMAIN = os.getenv('GOOGLE_DOMAIN', '*')
 
 try:
     from local_settings import *

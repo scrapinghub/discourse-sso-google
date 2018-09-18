@@ -2,6 +2,7 @@ import json
 import hmac
 import base64
 import hashlib
+import fnmatch
 
 from six.moves import urllib
 
@@ -28,13 +29,17 @@ def sso_login():
     except ValueError:
         abort(400)
 
-    state = jwt.encode(payload, settings.DISCOURSE_SECRET, 'HS256')
+    return _redirect_to_google_auth(payload)
 
+
+def _redirect_to_google_auth(payload):
+    state = jwt.encode(payload, settings.DISCOURSE_SECRET, 'HS256')
     query = urllib.parse.urlencode({
         'client_id': settings.GOOGLE_CLIENT_ID,
         'redirect_uri': settings.GOOGLE_REDIRECT_URI,
         'response_type': 'token',
         'scope': 'profile email',
+        'hd': settings.GOOGLE_DOMAIN,
         'state': state,
     })
     url = '{}?{}'.format(settings.GOOGLE_AUTH_URL, query)
@@ -55,6 +60,10 @@ def google_oauth2_next():
 
     payload = jwt.decode(state, settings.DISCOURSE_SECRET, algorithms=['HS256'])
     userinfo = json.loads(userinfo)
+
+    username, _, domain = userinfo['email'].partition('@')
+    if not fnmatch.fnmatch(domain, settings.GOOGLE_DOMAIN):
+        return _redirect_to_google_auth(payload)
 
     payload['external_id'] = userinfo['sub']
     payload['name'] = userinfo['name'].encode('utf-8')
