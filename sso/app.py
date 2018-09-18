@@ -32,20 +32,6 @@ def sso_login():
     return _redirect_to_google_auth(payload)
 
 
-def _redirect_to_google_auth(payload):
-    state = jwt.encode(payload, settings.DISCOURSE_SECRET, 'HS256')
-    query = urllib.parse.urlencode({
-        'client_id': settings.GOOGLE_CLIENT_ID,
-        'redirect_uri': settings.GOOGLE_REDIRECT_URI,
-        'response_type': 'token',
-        'scope': 'profile email',
-        'hd': settings.GOOGLE_DOMAIN,
-        'state': state,
-    })
-    url = '{}?{}'.format(settings.GOOGLE_AUTH_URL, query)
-    return redirect(url)
-
-
 @app.route('/discourse/sso/google-oauth2/callback')
 def google_oauth2_callback():
     return render_template('google-oauth2-callback.html')
@@ -93,3 +79,15 @@ def _sign_payload(payload, secret=settings.DISCOURSE_SECRET):
     ).hexdigest()
 
 
+def _redirect_to_google_auth(payload):
+    state = jwt.encode(payload, settings.DISCOURSE_SECRET, 'HS256')
+    query = urllib.parse.urlencode({
+        'client_id': settings.GOOGLE_CLIENT_ID,
+        'redirect_uri': settings.GOOGLE_REDIRECT_URI,
+        'response_type': 'token',
+        'scope': 'profile email',
+        'hd': settings.GOOGLE_DOMAIN,
+        'state': state,
+    })
+    url = '{}?{}'.format(settings.GOOGLE_AUTH_URL, query)
+    return redirect(url)
